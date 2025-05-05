@@ -2,6 +2,18 @@
 
 This Github Action allows developers to test and publish user transformations and custom libraries directly from their development repository. To know more about user transformations check [here](https://rudderstack.com/docs/transformations).
 
+## Prerequisites
+
+- You will need the email address associated with your RudderStack workspace.
+- Generate a [Service Access Token](https://www.rudderstack.com/docs/dashboard-guides/service-access-tokens/) with [Admin](http://www.rudderstack.com/docs/dashboard-guides/user-management/#organization-roles) permissions.
+
+<img width="465" alt="sat-permissions-action" src="https://github.com/user-attachments/assets/d0b8b937-28ba-423e-b7e2-de4a4c70752d" />
+
+Note that:
+
+- For production use cases, RudderStack recommends using a Service Access Token instead of [Personal Access Token](https://www.rudderstack.com/docs/dashboard-guides/personal-access-token).
+- For security purposes, it is highly recommended to use [GitHub secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) to store your Service Access Token.
+
 ## Usage
 
 ```yaml
