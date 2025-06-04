@@ -157,37 +157,55 @@ async function testTransformationAndLibrary(transformations, libraries) {
 }
 
 async function deleteTransformation(id) {
-  core.info(`Deleting transformation with id: ${id}`);
+  core.info(`Deleting transformation: ${id}`);
 
-  return axios.default.delete(
-    `${deleteTransformationsEndpoint}/${id}`,
-    {
-      auth: {
-        username: core.getInput("email"),
-        password: core.getInput("accessToken"),
+  try {
+    return await axios.default.delete(
+      `${deleteTransformationsEndpoint}/${id}`,
+      {
+        auth: {
+          username: core.getInput("email"),
+          password: core.getInput("accessToken"),
+        },
+        headers: {
+          ...defaultHeader,
+        },
       },
-      headers: {
-        ...defaultHeader,
-      },
-    },
-  );
+    );
+  } catch (err) {
+    if (err.response && err.response.status === 400) {
+      throw new Error(
+        `Failed to delete transformation ${id}: It may be connected to a destination.`
+      );
+    }
+    throw err;
+  }
 }
 
 async function deleteLibrary(id) {
-  core.info(`Deleting library with id ${id}`);
+  core.info(`Deleting library: ${id}`);
 
-  return axios.default.delete(
-    `${deleteTransformationsEndpoint}/${id}`,
-    {
-      auth: {
-        username: core.getInput("email"),
-        password: core.getInput("accessToken"),
+  try {
+    return await axios.default.delete(
+      `${createLibraryEndpoint}/${id}`,
+      {
+        auth: {
+          username: core.getInput("email"),
+          password: core.getInput("accessToken"),
+        },
+        headers: {
+          ...defaultHeader,
+        },
       },
-      headers: {
-        ...defaultHeader,
-      },
-    },
-  );
+    );
+  } catch (err) {
+    if (err.response && err.response.status === 400) {
+      throw new Error(
+        `Failed to delete library ${id}: It may be connected to a destination.`
+      );
+    }
+    throw err;
+  }
 }
 
 async function publish(transformations, libraries, commitId) {

@@ -177,14 +177,12 @@ async function deleteOrphanedTransformationsAndLibraries(
   for (const tr of workspaceTransformations) {
     if (!localTransformationNames.has(tr.name)) {
       await deleteTransformation(tr.id);
-      core.info(`\u001b[33mDeleting transformation: ${tr.id}\u001b[0m`)
     }
   }
 
   for (const lib of workspaceLibraries) {
     if (!localLibraryNames.has(lib.name)) {
       await deleteLibrary(lib.id);
-      core.info(`\u001b[33mDeleting library: ${lib.id}\u001b[0m`)
     }
   }
 }
