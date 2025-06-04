@@ -105,7 +105,7 @@ describe("test and publish transformation and libraries successfully", () => {
     await expect(testAndPublish(metapath)).resolves.toEqual(undefined);
 
     // Assert
-    expect(createTransformation).toHaveBeenCalledTimes(1);
+    expect(createTransformation).toHaveBeenCalledTimes(2);
     expect(createLibrary).toHaveBeenCalledTimes(2);
     expect(readFile("./test-outputs/transformation1_output.json")).toEqual(
       readFile("./src/testdata/expected.json"),
@@ -258,7 +258,7 @@ describe("test and publish transformation and libraries successfully", () => {
     });
 
     await expect(testAndPublish(metapath)).resolves.toEqual(undefined);
-    expect(updateTransformation).toHaveBeenCalledTimes(1);
+    expect(updateTransformation).toHaveBeenCalledTimes(2);
     expect(updateLibrary).toHaveBeenCalledTimes(2);
     expect(readFile("./test-outputs/transformation1_output.json")).toEqual(
       readFile("./src/testdata/expected.json"),

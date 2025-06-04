@@ -7,6 +7,15 @@
       "language": "javascript",
       "test-input-file": "./src/testdata/events.json",
       "expected-output": "./src/testdata/expected.json"
+    },
+    {
+      "file": "src/testdata/code.js",
+      "name": "Transformation_1",
+      "description": "Description_1",
+      "language": "javascript",
+      "test-input-file": "./src/testdata/events.json",
+      "expected-output": "./src/testdata/expected.json",
+      "publish": "true"
     }
   ],
   "libraries": [

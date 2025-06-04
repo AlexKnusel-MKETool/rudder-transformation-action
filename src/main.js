@@ -113,6 +113,7 @@ async function upsertTransformations(transformations, transformationNameToId) {
 
   for (const tr of transformations) {
     const code = fs.readFileSync(tr.file, "utf-8");
+    const publishFlag = typeof tr.publish === "boolean" ? tr.publish : false;
     let res;
     if (transformationNameToId[tr.name]) {
       // update existing transformer and get a new versionId
@@ -123,6 +124,7 @@ async function upsertTransformations(transformations, transformationNameToId) {
         tr.description,
         code,
         tr.language,
+        publishFlag,
       );
     } else {
       // create new transformer
@@ -131,6 +133,7 @@ async function upsertTransformations(transformations, transformationNameToId) {
         tr.description,
         code,
         tr.language,
+        publishFlag,
       );
     }
     transformationDict[res.data.versionId] = { ...tr, id: res.data.id };
@@ -146,16 +149,17 @@ async function upsertLibraries(libraries, libraryNameToId) {
   const libraryDict = {};
   for (const lib of libraries) {
     const code = fs.readFileSync(lib.file, "utf-8");
+    const publishFlag = typeof lib.publish === "boolean" ? lib.publish : false;
     let res;
     if (libraryNameToId[lib.name]) {
       // update library and get a new versionId
       core.info(`Updating library: ${lib.name}`);
       const id = libraryNameToId[lib.name];
-      res = await updateLibrary(id, lib.description, code, lib.language);
+      res = await updateLibrary(id, lib.description, code, lib.language, publishFlag);
     } else {
       // create a new library
       core.info(`Creating library: ${lib.name}`);
-      res = await createLibrary(lib.name, lib.description, code, lib.language);
+      res = await createLibrary(lib.name, lib.description, code, lib.language, publishFlag);
     }
     libraryDict[res.data.versionId] = { ...lib, id: res.data.id };
   }
