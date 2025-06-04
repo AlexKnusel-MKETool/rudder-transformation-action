@@ -12,6 +12,8 @@ const {
   updateTransformation,
   updateLibrary,
   testTransformationAndLibrary,
+  deleteTransformation,
+  deleteLibrary,
   publish,
 } = require("./apiCalls");
 
@@ -160,6 +162,18 @@ async function upsertLibraries(libraries, libraryNameToId) {
     libraryDict[res.data.versionId] = { ...lib, id: res.data.id };
   }
   return libraryDict;
+}
+
+async function deleteOrphanedTransformationsAndLibraries(
+  workspaceTransformations,
+  workspaceLibraries,
+  localTransformations,
+  localLibraries,
+) {
+  core.info(workspaceTransformations);
+  core.info(workspaceLibraries);
+  core.info(localTransformations);
+  core.info(localLibraries);  
 }
 
 // Build the test suite.
@@ -327,6 +341,13 @@ async function testAndPublish(path = metaFilePath) {
     getTransformationsAndLibrariesFromLocal(path);
   const { workspaceTransformations, workspaceLibraries } =
     await loadTransformationsAndLibraries();
+
+  await deleteOrphanedTransformationsAndLibraries(
+    workspaceTransformations,
+    workspaceLibraries,
+    transformations,
+    libraries,
+  );
 
   const transformationNameToId = buildNameToIdMap(workspaceTransformations);
   const libraryNameToId = buildNameToIdMap(workspaceLibraries);

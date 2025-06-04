@@ -10,6 +10,8 @@ const testEndpoint = `${serverEndpoint}/transformations/libraries/test`;
 const publishEndpoint = `${serverEndpoint}/transformations/libraries/publish`;
 const listTransformationsEndpoint = `${serverEndpoint}/transformations`;
 const listLibrariesEndpoint = `${serverEndpoint}/libraries`;
+const deleteTransformationsEndpoint = `${serverEndpoint}/transformations`;
+
 
 const defaultHeader = {
   "user-agent": "transformationAction",
@@ -154,6 +156,40 @@ async function testTransformationAndLibrary(transformations, libraries) {
   );
 }
 
+async function deleteTransformation(id) {
+  core.info(`Deleting transformation with id: ${id}`);
+
+  return axios.default.delete(
+    `${deleteTransformationsEndpoint}/${id}`,
+    {
+      auth: {
+        username: core.getInput("email"),
+        password: core.getInput("accessToken"),
+      },
+      headers: {
+        ...defaultHeader,
+      },
+    },
+  );
+}
+
+async function deleteLibrary(id) {
+  core.info(`Deleting library with id ${id}`);
+
+  return axios.default.delete(
+    `${deleteTransformationsEndpoint}/${id}`,
+    {
+      auth: {
+        username: core.getInput("email"),
+        password: core.getInput("accessToken"),
+      },
+      headers: {
+        ...defaultHeader,
+      },
+    },
+  );
+}
+
 async function publish(transformations, libraries, commitId) {
   core.info("Publishing transformations and libraries");
 
@@ -184,5 +220,7 @@ module.exports = {
   updateTransformation,
   updateLibrary,
   testTransformationAndLibrary,
+  deleteTransformation,
+  deleteLibrary,
   publish,
 };
