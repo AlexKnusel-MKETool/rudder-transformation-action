@@ -43,11 +43,11 @@ async function getAllLibraries() {
   });
 }
 
-async function createTransformation(name, description, code, language) {
+async function createTransformation(name, description, code, language, publishFlag) {
   core.info(`Creating transformation: ${name}`);
 
   return axios.default.post(
-    `${createTransformerEndpoint}?publish=false`,
+    `${createTransformerEndpoint}?publish=${publishFlag}`,
     {
       name,
       description,
@@ -66,11 +66,11 @@ async function createTransformation(name, description, code, language) {
   );
 }
 
-async function updateTransformation(id, name, description, code, language) {
+async function updateTransformation(id, name, description, code, language, publishFlag) {
   core.info(`Updating transformation: ${name}`);
 
   return axios.default.post(
-    `${createTransformerEndpoint}/${id}?publish=false`,
+    `${createTransformerEndpoint}/${id}?publish=${publishFlag}`,
     {
       description,
       code,
@@ -88,11 +88,11 @@ async function updateTransformation(id, name, description, code, language) {
   );
 }
 
-async function createLibrary(name, description, code, language) {
+async function createLibrary(name, description, code, language, publishFlag) {
   core.info(`Creating library: ${name}`);
 
   return axios.default.post(
-    `${createLibraryEndpoint}?publish=false`,
+    `${createLibraryEndpoint}?publish=${publishFlag}`,
     {
       name,
       description,
@@ -111,11 +111,11 @@ async function createLibrary(name, description, code, language) {
   );
 }
 
-async function updateLibrary(id, description, code, language) {
+async function updateLibrary(id, description, code, language, publishFlag) {
   core.info(`Updating library: ${id}`);
 
   return axios.default.post(
-    `${createLibraryEndpoint}/${id}?publish=false`,
+    `${createLibraryEndpoint}/${id}?publish=${publishFlag}`,
     {
       description,
       code,

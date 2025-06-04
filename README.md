@@ -65,6 +65,7 @@ with:
         "language" (required): <transformation language>,
         "test-input-file" (optional) : <path to file containing an array of events to test the transformation>,
         "expected-output" (optional) : <path to file containing an array of expected output for the above input after running the transformation code>
+        "publish" (optional) : <set to true to automatically publish the transformation after testing (default: false)>,
       }
      ```
       
@@ -75,6 +76,7 @@ with:
         "name" (required): <library name: this is the name by which to import it in any transformation code>,
         "description" (optional): <library description>,
         "language" (required): <library language>,
+        "publish" (optional) : <set to true to automatically publish the transformation after testing (default: false)>,
       }
      ```
       
@@ -88,7 +90,8 @@ with:
             "description": "javascript transformation T1",
             "language": "javascript",
             "test-input-file": "./code/events.json",
-            "expected-output": "./code/expected.json"
+            "expected-output": "./code/expected.json",
+            "publish": "true",
           },
           {
             "file": "./code/code_2.py",
@@ -102,7 +105,8 @@ with:
             "file": "./code/lib1.js",
             "name": "action-L1",
             "description": "javascript transformation library L1",
-            "language": "javascript"
+            "language": "javascript",
+            "publish": "true",
           },
           {
             "file": "./code/lib2.py",
