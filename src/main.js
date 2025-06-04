@@ -170,10 +170,10 @@ async function deleteOrphanedTransformationsAndLibraries(
   localTransformations,
   localLibraries,
 ) {
-  core.info(workspaceTransformations);
-  core.info(workspaceLibraries);
-  core.info(localTransformations);
-  core.info(localLibraries);  
+  core.info(JSON.stringify(workspaceTransformations));
+  core.info(JSON.stringify(workspaceLibraries));
+  core.info(JSON.stringify(localTransformations));
+  core.info(JSON.stringify(localLibraries));  
 }
 
 // Build the test suite.
