@@ -170,18 +170,31 @@ async function buildTestSuite(transformationDict, libraryDict) {
   const librariesTest = [];
 
   for (const trVersionId of Object.keys(transformationDict)) {
-    const testInputPath =
-      transformationDict[trVersionId]["test-input-file"] || "";
-    const testInput = testInputPath
-      ? JSON.parse(fs.readFileSync(testInputPath))
-      : "";
-    if (testInput) {
-      transformationTest.push({ versionId: trVersionId, testInput });
+    const tr = transformationDict[trVersionId];
+    const testInputPath = test["test-input-file"] || "";
+    if (Array.isArray(tr.tests) && tr.tests.length > 0) {
+      for (const [i, test] of tr.tests.entries()) {
+        const testInput = testInputPath
+          ? JSON.parse(fs.readFileSync(testInputPath))
+          : "";
+        transformationTest.push({
+          versionId: trVersionId,
+          testInput,
+          testIndex: i, // To help with output file naming
+          expectedOutputFile: test["expected-output"] || "",
+        });
+      }
     } else {
-      core.info(
-        `No test input provided. Testing ${transformationDict[trVersionId].name} with default payload`,
-      );
-      transformationTest.push({ versionId: trVersionId });
+      // fallback to old single test-input-file/expected-output
+      const testInput = testInputPath
+        ? JSON.parse(fs.readFileSync(testInputPath))
+        : "";
+      transformationTest.push({
+        versionId: trVersionId,
+        testInput,
+        testIndex: 0,
+        expectedOutputFile: tr["expected-output"] || "",
+      });
     }
   }
 
@@ -226,7 +239,7 @@ async function compareOutput(successResults, transformationDict) {
   const outputMismatchResults = [];
   const testOutputFiles = [];
   for (const successResult of successResults) {
-    const { transformerVersionID } = successResult;
+    const { transformerVersionID, testIndex = 0 } = successResult;
 
     if (!fs.existsSync(testOutputDir)) {
       fs.mkdirSync(testOutputDir);
@@ -245,25 +258,35 @@ async function compareOutput(successResults, transformationDict) {
     const transformationName = transformationDict[transformerVersionID].name;
     const transformationHandleName = _.camelCase(transformationName);
 
+    // Use testIndex in file name if multiple tests
+    const outputFileName =
+      testIndex > 0
+        ? `${testOutputDir}/${transformationHandleName}_output_${testIndex}.json`
+        : `${testOutputDir}/${transformationHandleName}_output.json`;
+
     fs.writeFileSync(
-      `${testOutputDir}/${transformationHandleName}_output.json`,
+      outputFileName,
       JSON.stringify(actualOutput, null, 2),
     );
-    testOutputFiles.push(
-      `${testOutputDir}/${transformationHandleName}_output.json`,
-    );
+    testOutputFiles.push(outputFileName);
 
+    // Find expected output file for this test
+    let expectedOutputfile = "";
     if (
-      !Object.prototype.hasOwnProperty.call(
-        transformationDict[transformerVersionID],
-        "expected-output",
-      )
+      Array.isArray(transformationDict[transformerVersionID].tests) &&
+      transformationDict[transformerVersionID].tests[testIndex]
     ) {
-      continue;
+      expectedOutputfile =
+        transformationDict[transformerVersionID].tests[testIndex][
+          "expected-output"
+        ];
+    } else if (
+      transformationDict[transformerVersionID]["expected-output"]
+    ) {
+      expectedOutputfile =
+        transformationDict[transformerVersionID]["expected-output"];
     }
 
-    const expectedOutputfile =
-      transformationDict[transformerVersionID]["expected-output"];
     const expectedOutput = expectedOutputfile
       ? JSON.parse(fs.readFileSync(expectedOutputfile))
       : "";
@@ -274,20 +297,23 @@ async function compareOutput(successResults, transformationDict) {
 
     if (!isEqual(expectedOutput, actualOutput)) {
       core.info(
-        `Test output do not match for transformation: ${transformationName}`,
+        `Test output do not match for transformation: ${transformationName} (test ${testIndex})`,
       );
       outputMismatchResults.push(
-        `Test output do not match for transformation: ${transformationName}`,
+        `Test output do not match for transformation: ${transformationName} (test ${testIndex})`,
       );
 
+      const diffFileName =
+        testIndex > 0
+          ? `${testOutputDir}/${transformationHandleName}_diff_${testIndex}.json`
+          : `${testOutputDir}/${transformationHandleName}_diff.json`;
+
       fs.writeFileSync(
-        `${testOutputDir}/${transformationHandleName}_diff.json`,
+        diffFileName,
         JSON.stringify(detailedDiff(expectedOutput, actualOutput), null, 2),
       );
 
-      testOutputFiles.push(
-        `${testOutputDir}/${transformationHandleName}_diff.json`,
-      );
+      testOutputFiles.push(diffFileName);
     }
   }
   return { outputMismatchResults, testOutputFiles };
