@@ -413,4 +413,73 @@ describe("test and publish transformation and libraries successfully", () => {
 
     await expect(testAndPublish(metapath)).resolves.toEqual(undefined);
   });
+
+  it("should handle a transformation with multiple test cases", async () => {
+    // Arrange
+    const metapath = "./src/testdata/meta_multiple_tests.json";
+    getAllTransformations.mockResolvedValue([]);
+    getAllLibraries.mockResolvedValue([]);
+    createTransformation.mockResolvedValue({
+      data: {
+        id: "transformation_id_1",
+        versionId: "transformation_version_id_1",
+      },
+    });
+    createLibrary
+      .mockReturnValueOnce({
+        data: {
+          id: "library_id_1",
+          versionId: "library_version_id_1",
+        },
+      })
+      .mockReturnValueOnce({
+        data: {
+          id: "library_id_2",
+          versionId: "library_version_id_2",
+        },
+      });
+
+    // Simulate two test runs for the same transformation
+    testTransformationAndLibrary.mockResolvedValue({
+      data: {
+        result: {
+          successTestResults: [
+            {
+              transformerVersionID: "transformation_version_id_1",
+              testIndex: 0,
+              result: {
+                output: {
+                  transformedEvents: readFile("./src/testdata/expected.json"),
+                },
+              },
+            },
+            {
+              transformerVersionID: "transformation_version_id_1",
+              testIndex: 1,
+              result: {
+                output: {
+                  transformedEvents: readFile("./src/testdata/expected_alt.json"),
+                },
+              },
+            },
+          ],
+          failedTestResults: [],
+        },
+      },
+    });
+
+    // Act
+    await expect(testAndPublish(metapath)).resolves.toEqual(undefined);
+
+    // Assert
+    expect(createTransformation).toHaveBeenCalledTimes(1);
+    expect(createLibrary).toHaveBeenCalledTimes(2);
+    // Check both outputs exist
+    expect(readFile("./test-outputs/transformation1_output.json")).toEqual(
+      readFile("./src/testdata/expected.json"),
+    );
+    expect(readFile("./test-outputs/transformation1_output_1.json")).toEqual(
+      readFile("./src/testdata/expected_alt.json"),
+    );
+  });
 });

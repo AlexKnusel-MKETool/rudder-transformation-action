@@ -5,8 +5,16 @@
       "name": "Transformation_1",
       "description": "Description_1",
       "language": "javascript",
-      "test-input-file": "./src/testdata/events.json",
-      "expected-output": "./src/testdata/expected.json"
+      "tests": [
+        {
+          "test-input-file": "./src/testdata/events.json",
+          "expected-output": "./src/testdata/expected.json"
+        },
+        {
+          "test-input-file": "./src/testdata/events2.json",
+          "expected-output": "./src/testdata/expected_alt.json"
+        }
+      ]
     }
   ],
   "libraries": [
