@@ -87,8 +87,16 @@ with:
             "name": "action-T1",
             "description": "javascript transformation T1",
             "language": "javascript",
-            "test-input-file": "./code/events.json",
-            "expected-output": "./code/expected.json"
+            "tests": [
+              {
+                "test-input-file": "./src/testdata/events.json",
+                "expected-output": "./src/testdata/expected.json"
+              },
+              {
+                "test-input-file": "./src/testdata/events2.json",
+                "expected-output": "./src/testdata/expected2.json"
+              }
+            ]
           },
           {
             "file": "./code/code_2.py",
