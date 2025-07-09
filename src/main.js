@@ -171,9 +171,9 @@ async function buildTestSuite(transformationDict, libraryDict) {
 
   for (const trVersionId of Object.keys(transformationDict)) {
     const tr = transformationDict[trVersionId];
-    const testInputPath = test["test-input-file"] || "";
     if (Array.isArray(tr.tests) && tr.tests.length > 0) {
       for (const [i, test] of tr.tests.entries()) {
+        const testInputPath = test["test-input-file"] || "";
         const testInput = testInputPath
           ? JSON.parse(fs.readFileSync(testInputPath))
           : "";
@@ -186,6 +186,7 @@ async function buildTestSuite(transformationDict, libraryDict) {
       }
     } else {
       // fallback to old single test-input-file/expected-output
+      const testInputPath = tr["test-input-file"] || "";
       const testInput = testInputPath
         ? JSON.parse(fs.readFileSync(testInputPath))
         : "";
@@ -239,7 +240,7 @@ async function compareOutput(successResults, transformationDict) {
   const outputMismatchResults = [];
   const testOutputFiles = [];
   for (const successResult of successResults) {
-    const { transformerVersionID, testIndex = 0 } = successResult;
+    const { transformerVersionID } = successResult;
 
     if (!fs.existsSync(testOutputDir)) {
       fs.mkdirSync(testOutputDir);
@@ -258,35 +259,25 @@ async function compareOutput(successResults, transformationDict) {
     const transformationName = transformationDict[transformerVersionID].name;
     const transformationHandleName = _.camelCase(transformationName);
 
-    // Use testIndex in file name if multiple tests
-    const outputFileName =
-      testIndex > 0
-        ? `${testOutputDir}/${transformationHandleName}_output_${testIndex}.json`
-        : `${testOutputDir}/${transformationHandleName}_output.json`;
-
     fs.writeFileSync(
-      outputFileName,
+      `${testOutputDir}/${transformationHandleName}_output.json`,
       JSON.stringify(actualOutput, null, 2),
     );
-    testOutputFiles.push(outputFileName);
+    testOutputFiles.push(
+      `${testOutputDir}/${transformationHandleName}_output.json`,
+    );
 
-    // Find expected output file for this test
-    let expectedOutputfile = "";
     if (
-      Array.isArray(transformationDict[transformerVersionID].tests) &&
-      transformationDict[transformerVersionID].tests[testIndex]
+      !Object.prototype.hasOwnProperty.call(
+        transformationDict[transformerVersionID],
+        "expected-output",
+      )
     ) {
-      expectedOutputfile =
-        transformationDict[transformerVersionID].tests[testIndex][
-          "expected-output"
-        ];
-    } else if (
-      transformationDict[transformerVersionID]["expected-output"]
-    ) {
-      expectedOutputfile =
-        transformationDict[transformerVersionID]["expected-output"];
+      continue;
     }
 
+    const expectedOutputfile =
+      transformationDict[transformerVersionID]["expected-output"];
     const expectedOutput = expectedOutputfile
       ? JSON.parse(fs.readFileSync(expectedOutputfile))
       : "";
@@ -297,23 +288,20 @@ async function compareOutput(successResults, transformationDict) {
 
     if (!isEqual(expectedOutput, actualOutput)) {
       core.info(
-        `Test output do not match for transformation: ${transformationName} (test ${testIndex})`,
+        `Test output do not match for transformation: ${transformationName}`,
       );
       outputMismatchResults.push(
-        `Test output do not match for transformation: ${transformationName} (test ${testIndex})`,
+        `Test output do not match for transformation: ${transformationName}`,
       );
 
-      const diffFileName =
-        testIndex > 0
-          ? `${testOutputDir}/${transformationHandleName}_diff_${testIndex}.json`
-          : `${testOutputDir}/${transformationHandleName}_diff.json`;
-
       fs.writeFileSync(
-        diffFileName,
+        `${testOutputDir}/${transformationHandleName}_diff.json`,
         JSON.stringify(detailedDiff(expectedOutput, actualOutput), null, 2),
       );
 
-      testOutputFiles.push(diffFileName);
+      testOutputFiles.push(
+        `${testOutputDir}/${transformationHandleName}_diff.json`,
+      );
     }
   }
   return { outputMismatchResults, testOutputFiles };
